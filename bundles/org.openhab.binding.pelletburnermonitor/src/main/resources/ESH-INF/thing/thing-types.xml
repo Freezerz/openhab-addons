@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="pelletburnermonitor"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<thing-type id="pelletburner_nbe_v13_1005">
+		<label>PelletBurnerMonitor Binding Thing</label>
+		<description>Thing for PelletBurnerMonitor Binding</description>
+
+		<channels>
+			<channel id="boilerCurrentTemperature" typeId="number-type"/>
+			<channel id="boilerTargetTemperature" typeId="number-type"/>
+			<channel id="boilerLimitTemperatureBelow" typeId="number-type"/>
+			<channel id="boilerLimitTemperatureAbove" typeId="number-type"/>
+
+			<channel id="siloContents" typeId="number-type"/>
+			<channel id="siloMinimumContents" typeId="number-type"/>
+			<channel id="augerConsumption" typeId="number-type"/>
+			<channel id="boilerCleaningCountdown" typeId="number-type"/>
+			<channel id="consumptionPreviousHour" typeId="number-type"/>
+
+			<channel id="boilerPowerOutputPercentage" typeId="percent-type"/>
+			<channel id="boilerPowerOutputKilowatts" typeId="number-type"/>
+
+			<channel id="alarmCode" typeId="wholenumber-type"/>
+			<channel id="alarmText" typeId="string-type"/>
+
+			<channel id="refillSilo" typeId="refillsilo-type"/>
+		</channels>
+
+		<config-description>
+			<parameter name="localaddress" type="text" required="false">
+				<label>Local system address</label>
+				<description>Provide either the IP address or hostname of the local system</description>
+			</parameter>
+
+			<parameter name="localport" type="text" required="false">
+				<label>Local port</label>
+				<description>Local port to be used</description>
+			</parameter>
+
+			<parameter name="remoteaddress" type="text" required="true">
+				<label>Boiler address</label>
+				<description>Provide either the IP address or url for the boiler</description>
+			</parameter>
+
+			<parameter name="remoteport" type="text" required="false">
+				<label>Remote port</label>
+				<description>Remote port to be used</description>
+			</parameter>
+
+			<parameter name="serial" type="text" required="true">
+				<label>Serial number</label>
+				<description>Serial number of the boiler (5 or 6 digits)</description>
+			</parameter>
+
+			<parameter name="refresh" type="text" required="false">
+				<label>Refresh interval</label>
+				<description>Refresh interval in minutes. Default is 15</description>
+			</parameter>
+
+			<parameter name="password" type="text" required="false">
+				<label>Password</label>
+				<description>Password of the boiler (10 digits)</description>
+			</parameter>
+		</config-description>
+	</thing-type>
+
+	<channel-type id="number-type" advanced="true">
+		<item-type>Number</item-type>
+		<label>Number</label>
+		<description>Decimal number</description>
+		<state pattern="%.3f %unit%" readOnly="true"/>
+	</channel-type>
+
+	<channel-type id="wholenumber-type" advanced="true">
+		<item-type>Number</item-type>
+		<label>Number</label>
+		<description>Whole number</description>
+		<state pattern="%d %unit%" readOnly="true"/>
+	</channel-type>
+
+	<channel-type id="percent-type" advanced="true">
+		<item-type>Number</item-type>
+		<label>Percent</label>
+		<description>Percent</description>
+		<state pattern="%d %unit%" min="0" max="100" readOnly="true"/>
+	</channel-type>
+
+	<channel-type id="string-type" advanced="true">
+		<item-type>String</item-type>
+		<label>String</label>
+		<description>String</description>
+		<state readOnly="true"/>
+	</channel-type>
+
+	<channel-type id="refillsilo-type">
+		<item-type>Switch</item-type>
+		<label>Refill Silo</label>
+		<description>If this is on the silo should be refilled</description>
+		<category>Switch</category>
+	</channel-type>
+</thing:thing-descriptions>
