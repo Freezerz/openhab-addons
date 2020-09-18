@@ -1,56 +1,160 @@
 # PelletBurnerMonitor Binding
 
-_Give some details about what this binding is meant for - a protocol, system, specific device._
+This binding is for communicating with pelletburners which use the NBE software.
+This includes Woody, Scotty and perhaps others.
+This should work as long as the pelletburner is connected to the local network through either wifi or LAN.
 
 _If possible, provide some resources like pictures, a YouTube video, etc. to give an impression of what can be done with this binding. You can place such resources into a `doc` folder next to this README.md._
 
 ## Supported Things
 
-_Please describe the different supported things / devices within this section._
-_Which different types are supported, which models were tested etc.?_
-_Note that it is planned to generate some part of this based on the XML files within ```src/main/resources/ESH-INF/thing``` of your binding._
+Currently pelletburners with software version 13.1005 are supported.
+Other versions might work also, but issues are likely to occur across major versions.
+
+Only a subset of the readable values are currently implemented.
+No writing/setting of values are implemented yet.
+
+Verified: Woody BS+ 16kW with software version V13.1005.9
 
 ## Discovery
 
-_Describe the available auto-discovery features here. Mention for what it works and what needs to be kept in mind when using it._
+Discovery of pelletburner happens based on the Thing configuration.
+In the simplest case only IP and serial are necessary to specify.
+Broadcast discovery is not yet implemented.
 
 ## Binding Configuration
 
-_If your binding requires or supports general configuration settings, please create a folder ```cfg``` and place the configuration file ```<bindingId>.cfg``` inside it. In this section, you should link to this file and provide some information about the options. The file could e.g. look like:_
-
-```
-# Configuration for the Philips Hue Binding
-#
-# Default secret key for the pairing of the Philips Hue Bridge.
-# It has to be between 10-40 (alphanumeric) characters
-# This may be changed by the user for security reasons.
-secret=openHABSecret
-```
-
-_Note that it is planned to generate some part of this based on the information that is available within ```src/main/resources/ESH-INF/binding``` of your binding._
-
-_If your binding does not offer any generic configurations, you can remove this section completely._
+None yet.
 
 ## Thing Configuration
 
-_Describe what is needed to manually configure a thing, either through the (Paper) UI or via a thing-file. This should be mainly about its mandatory and optional configuration parameters. A short example entry for a thing file can help!_
+To configure pelletburner, create a thing-file with the following contents.
+pelletburnermonitor:pelletburner_nbe_v13_1005:myburner     [ remoteaddress="W.X.Y.Z", serial="123456", refresh="9" ]
 
-_Note that it is planned to generate some part of this based on the XML files within ```src/main/resources/ESH-INF/thing``` of your binding._
+pelletburner_nbe_v13_1005 is the Thing specifying which protocol version is to be used
+"W.X.Y.Z" is the IP address of the pelletburner on the local network
+"123456" is the serial number of the pelletburner
+"9" is the refresh interval of minutes (the time between the binding fetches data from the pelletburner)
+
+Check the Setup part of the pelletburner screen/app for IP, software version and serial number. 
 
 ## Channels
 
-_Here you should provide information about available channel types, what their meaning is and how they can be used._
-
-_Note that it is planned to generate some part of this based on the XML files within ```src/main/resources/ESH-INF/thing``` of your binding._
-
 | channel  | type   | description                  |
 |----------|--------|------------------------------|
-| control  | Switch | This is the control channel  |
+| boilerCurrentTemperature | Number | This is the current temperature  |
+| boilerTargetTemperature | Number | This is the target temperature  |
+| boilerLimitTemperatureBelow | Number | This is the temperature difference at which the burner starts  |
+| boilerLimitTemperatureAbove | Number | This is the temperature difference at which the burner stops |
+| siloContents | Number | This is the amount of pellets in the silo  |
+| siloMinimumContents | Number | This is the warning limit for amount of pellets in silo  |
+| augerConsumption | Number | This is the consumption of the auger  |
+| boilerCleaningCountdown | Number | This is amount of pellets to burn before ash tray should be cleaned  |
+| consumptionPreviousHour | Number | This is the consumption of pellets during the previous full hour  |
+| boilerPowerOutputPercentage | Number | This is the power output in percentage (%) |
+| boilerPowerOutputKilowatts | Number | This is the power output in kW  |
+| alarmCode | Number | This is the status code of the burner |
+| alarmText | String | This is the text corresponding to the status code  |
+| timestampLastUpdate | DateTime | This is the time for the last update when fetching from server  |
+| refillSilo | Switch | This is on if silo should be refilled  |
 
 ## Full Example
 
-_Provide a full usage example based on textual configuration files (*.things, *.items, *.sitemap)._
+###Example pelletburner.things
+
+```
+pelletburnermonitor:pelletburner_nbe_v13_1005:myburner     [ remoteaddress="W.X.Y.Z", serial="123456", refresh="9" ]
+```
+
+###Example pelletburner.items
+
+```
+Number BoilerCurrentTemperature     "Current temperature [%.1f °C]"     { channel="pelletburnermonitor:pelletburner_nbe_v13_1005:myburner:boilerCurrentTemperature" }
+Number BoilerTargetTemperature      "Target temperature [%.1f °C]"      { channel="pelletburnermonitor:pelletburner_nbe_v13_1005:myburner:boilerTargetTemperature" }
+Number BoilerLimitTemperatureBelow  "Lower temperature limit [%.1f °C]" { channel="pelletburnermonitor:pelletburner_nbe_v13_1005:myburner:boilerLimitTemperatureBelow" }
+Number BoilerLimitTemperatureAbove  "Upper temperature limit [%.1f °C]" { channel="pelletburnermonitor:pelletburner_nbe_v13_1005:myburner:boilerLimitTemperatureAbove" }
+
+Number BoilerContents               "Silo contents [%.0f kg]"           { channel="pelletburnermonitor:pelletburner_nbe_v13_1005:myburner:siloContents" }
+Number BoilerMinimumContents        "Silo warning limit [%.0f kg]"      { channel="pelletburnermonitor:pelletburner_nbe_v13_1005:myburner:siloMinimumContents" }
+Number AugerConsumption             "Auger consumption [%.0f g]"        { channel="pelletburnermonitor:pelletburner_nbe_v13_1005:myburner:augerConsumption" }
+Number CleaningCountdown            "Empty ash tray after [%.0f kg]"    { channel="pelletburnermonitor:pelletburner_nbe_v13_1005:myburner:boilerCleaningCountdown" }
+Number ConsumptionPreviousHour      "Consumption last hour [%.3f kg]"   { channel="pelletburnermonitor:pelletburner_nbe_v13_1005:myburner:consumptionPreviousHour"}
+
+Number BoilerPowerOutputPercentage  "Output [%d %%]"                    { channel="pelletburnermonitor:pelletburner_nbe_v13_1005:myburner:boilerPowerOutputPercentage" }
+Number BoilerPowerOutputKilowatts   "Output [%.0f kW]"                  { channel="pelletburnermonitor:pelletburner_nbe_v13_1005:myburner:boilerPowerOutputKilowatts" }
+
+Number AlarmCode                    "Alarm code [%d]"                   { channel="pelletburnermonitor:pelletburner_nbe_v13_1005:myburner:alarmCode" }
+String AlarmText                    "Alarm text [%s]"                   { channel="pelletburnermonitor:pelletburner_nbe_v13_1005:myburner:alarmText" }
+DateTime LastUpdate                 "Last update [%1$tY-%1$tm-%1$tdT%1$tH:%1$tM:%1$tS]" <time> { channel="pelletburnermonitor:pelletburner_nbe_v13_1005:myburner:timestampLastUpdate" }
+Switch RefillSilo                   "Should silo be refilled"           { channel="pelletburnermonitor:pelletburner_nbe_v13_1005:myburner:refillSilo" }
+```
+
+###Example pelletburner.sitemap
+
+```
+sitemap demo label="Main Menu"
+{
+                Text label="Pelletburner" icon="heating"
+        {
+                Frame label="Status"
+                {
+                        Text item=AlarmCode
+                        Text item=AlarmText
+                        Text item=LastUpdate
+                }
+
+                Frame label="Output"
+                {
+                        Text item=BoilerPowerOutputPercentage
+                        Text item=BoilerPowerOutputKilowatts
+                }
+
+                Frame label="Temperature"
+                {
+                        Text item=BoilerTargetTemperature
+                        Text item=BoilerCurrentTemperature
+                        Text item=BoilerLimitTemperatureBelow
+                        Text item=BoilerLimitTemperatureAbove
+                }
+
+                Frame label="Silo"
+                {
+                        Text item=BoilerContents icon="chart"
+                        Text item=BoilerMinimumContents
+                        Text item=ConsumptionPreviousHour
+                        Text item=RefillSilo label="Refill silo: [MAP(pelletburner.map):%s]" icon=siren
+                }
+
+                Frame label="Burner"
+                {
+                        Text item=AugerConsumption
+                        Text item=CleaningCountdown
+                }
+        }
+}
+```
+
+###Example pelletburner.map
+
+```
+ON=Yes
+OFF=No
+-=No data yet
+```
 
 ## Any custom content here!
 
-_Feel free to add additional sections for whatever you think should also be mentioned about your binding!_
+### General information
+
+The functionality of this binding has been created mainly by reverseengineering using Wireshark to figure out parts of the protocol.
+Only reading of data and not writing of data is implemented, as that would require getting hold of the documentation as I don't want to risk bricking my burner.
+
+### Adding new products/models
+
+If it's a completely different model, it should be necessary to create a new Thing.
+If it's a different software model of an already implemented model, it should be enough to create a new set of subclasses for Protocol, Request, RequestType and Response.
+
+### Troubleshooting
+
+Sometimes the burner becomes unreachable.
+In those cases it can be necessary to powercycle the burner; remove power cord from outlet, and after a few seconds reattach cord to outlet.

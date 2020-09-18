@@ -25,6 +25,7 @@
 
 			<channel id="alarmCode" typeId="wholenumber-type"/>
 			<channel id="alarmText" typeId="string-type"/>
+			<channel id="timestampLastUpdate" typeId="timestamp-type"/>
 
 			<channel id="refillSilo" typeId="refillsilo-type"/>
 		</channels>
@@ -95,10 +96,19 @@
 		<state readOnly="true"/>
 	</channel-type>
 
+	<channel-type id="timestamp-type">
+		<item-type>DateTime</item-type>
+		<label>Last update</label>
+		<description>Time of last successful fetching of data from burner</description>
+		<category>Time</category>
+		<state readOnly="true" pattern="%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS"/>
+	</channel-type>
+
 	<channel-type id="refillsilo-type">
 		<item-type>Switch</item-type>
 		<label>Refill Silo</label>
 		<description>If this is on the silo should be refilled</description>
 		<category>Switch</category>
+		<state readOnly="true"/>
 	</channel-type>
 </thing:thing-descriptions>

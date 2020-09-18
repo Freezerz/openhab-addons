@@ -56,7 +56,7 @@ public abstract class Protocol {
      *
      * @return Response object
      */
-    protected abstract Response getResponse();
+    protected abstract Response getResponse(boolean newResponse);
 
     /**
      * Implement this in subclass, to do the discovery of the remotehost
@@ -113,6 +113,8 @@ public abstract class Protocol {
      */
     protected boolean discoverBurnerByRequestType(int requestType, boolean retryOnFail) throws PBMException {
         getRequest().setRequestType(requestType);
+        // FIXME Quick fix to avoid inheriting data between calls
+        getResponse(true);
         Response response = sendAndRecieve();
 
         // In case of failure, and it is allowed to retry, try contacting the server again
@@ -138,7 +140,7 @@ public abstract class Protocol {
 
         // Initialize request and response - created in their respective subclasses of classes Request and Response
         request = getRequest();
-        response = getResponse();
+        response = getResponse(false);
 
         response.setRawData(new byte[0]); // Clear data from previous call
 
@@ -191,7 +193,7 @@ public abstract class Protocol {
             throw new PBMException("Unable to use local port", PBMExceptionType.UNABLE_TO_BIND_LOCAL_PORT);
         }
 
-        return getResponse();
+        return getResponse(false);
     }
 
     // FIXME This bindToLocalPort method is too NBE specific regarding the port usage of only the four-digits ones. It

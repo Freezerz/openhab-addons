@@ -56,5 +56,6 @@ public class PelletBurnerMonitorBindingConstants {
 
     public static final String CHANNEL_ALARM_CODE = "alarmCode";
     public static final String CHANNEL_ALARM_TEXT = "alarmText";
+    public static final String CHANNEL_TIMESTAMP_LAST_UPDATE = "timestampLastUpdate";
     public static final String CHANNEL_REFILL_SILO = "refillSilo";
 }

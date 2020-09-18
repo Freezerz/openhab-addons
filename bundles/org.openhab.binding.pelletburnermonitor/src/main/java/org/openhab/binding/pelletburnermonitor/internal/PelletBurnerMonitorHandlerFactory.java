@@ -53,7 +53,7 @@ public class PelletBurnerMonitorHandlerFactory extends BaseThingHandlerFactory {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         // The idea here, is to have the same Handler for each productline/model, and then different Protocol subclasses
-        // for the different software versions of the same productline/model. I.e. all products NBE uses
+        // for the different software versions of the same productline/model. I.e. all NBE products uses
         // PelletBurnerMonitorNBEHandler
         if (PelletBurnerMonitorBindingConstants.THING_TYPE_NBE_V13_1005.equals(thingTypeUID)) {
             return new PelletBurnerMonitorNBEHandler(thing);

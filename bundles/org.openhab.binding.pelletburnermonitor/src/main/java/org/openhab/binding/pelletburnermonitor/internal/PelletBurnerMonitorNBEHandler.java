@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.StringType;
@@ -102,10 +103,6 @@ public class PelletBurnerMonitorNBEHandler extends BaseThingHandler {
         }
         return status;
     }
-
-    // FIXME 1. Der skal laves en channel der kan bruges til manuelt at hente data fra bindingen.
-    //
-    // FIXME 2. Der skal laves en channel der viser timestamp for sidste succefulde opdatering.
 
     /**
      * Will try to discover the burner, fetch data and update the appropriate channels
@@ -195,6 +192,11 @@ public class PelletBurnerMonitorNBEHandler extends BaseThingHandler {
         // Update alarm code and text
         updateStateIfValidValue(CHANNEL_ALARM_CODE, response.getAlarmCode(), TYPE_INTEGER);
         updateStateIfValidValue(CHANNEL_ALARM_TEXT, response.getAlarmText(), TYPE_TEXT);
+
+        // Update the current timestamp as the last thing, as if we reach this point, the update was successful
+        State state = new DateTimeType();
+        updateState(CHANNEL_TIMESTAMP_LAST_UPDATE, state);
+        logger.debug("PBM: Channel '{}' set to '{}'", CHANNEL_TIMESTAMP_LAST_UPDATE, state.toString());
 
         logger.debug("PBM: Channel updates completed");
     }
@@ -292,7 +294,7 @@ public class PelletBurnerMonitorNBEHandler extends BaseThingHandler {
             }
 
             updateState(channel, state);
-            logger.debug("PBM: Channel {} set to {}", channel, state.toString());
+            logger.debug("PBM: Channel '{}' set to '{}'", channel, state.toString());
 
         } catch (NumberFormatException e) {
             logger.debug("PBM: Unable to convert string to int. : '{}', for channel '{}'", value, channel);
@@ -336,7 +338,7 @@ public class PelletBurnerMonitorNBEHandler extends BaseThingHandler {
      */
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        logger.debug("PBM: Processing command '{}' for channel {}", command.toString(), channelUID.getId());
+        // logger.debug("PBM: Processing command '{}' for channel {}", command.toString(), channelUID.getId());
     }
 
     /**

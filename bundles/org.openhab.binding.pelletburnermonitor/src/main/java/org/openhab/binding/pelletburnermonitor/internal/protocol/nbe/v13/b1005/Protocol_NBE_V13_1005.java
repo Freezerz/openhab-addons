@@ -50,6 +50,7 @@ public class Protocol_NBE_V13_1005 extends Protocol {
     @Override
     protected Request getRequest() {
         if (request == null) {
+            // FIXME Request should never be reused?
             request = new Request_NBE_V13_1005(options);
         }
         return request;
@@ -59,8 +60,8 @@ public class Protocol_NBE_V13_1005 extends Protocol {
      * Singleton
      */
     @Override
-    protected Response getResponse() {
-        if (response == null) {
+    protected Response getResponse(boolean newResponse) {
+        if (response == null || newResponse) {
             response = new Response_NBE_V13_1005();
         }
         return response;
@@ -74,23 +75,28 @@ public class Protocol_NBE_V13_1005 extends Protocol {
      * @throws PBMException
      */
     private Response getDataAndRetryOnTimeout(String datatype) throws PBMException {
-        Response response = getResponse();
+        Response response = getResponse(false);
+        final int MAX_RETRIES_ON_TIMEOUT = 4;
 
-        try {
-            response = sendAndRecieve();
-        } catch (PBMException e) {
-            logger.debug("PBM: Error fetching {} data: {}", datatype, e.getErrorCode());
-
-            // In case of the exception being a timeout, retry. Otherwise reraise the exception as something could be
-            // wrong with the configuration etc.
-            if (e.getErrorCode() == PBMExceptionType.TIMEOUT) {
-                logger.debug("PBM: Retrying");
+        // Try up to four times when TIMEOUT
+        for (int i = 0; i < MAX_RETRIES_ON_TIMEOUT; i++) {
+            try {
                 response = sendAndRecieve();
-            } else {
-                throw e;
+                return response;
+            } catch (PBMException e) {
+                // In case of the exception being a timeout, retry. Otherwise reraise the exception as something could
+                // be wrong with the configuration etc.
+                if (e.getErrorCode() == PBMExceptionType.TIMEOUT) {
+                    if (i < MAX_RETRIES_ON_TIMEOUT) {
+                        logger.debug("PBM: Retry fetching '{}' data because of timeout", datatype);
+                    }
+                    // response = sendAndRecieve();
+                } else {
+                    logger.debug("PBM: Error fetching {} data: {}", datatype, e.getErrorCode());
+                    throw e;
+                }
             }
         }
-
         return response;
     }
 
@@ -101,8 +107,14 @@ public class Protocol_NBE_V13_1005 extends Protocol {
     public Response getAllData() throws PBMException {
         // FIXME This could/should be done more intelligently. Perhaps it's possible to figure out which channels are
         // being used, and only fetch the data relevant for these channels?
-        Request request = getRequest();
-        Response response = getResponse();
+
+        // FIXME Quick fix to avoid subsequent calls to getAllData to keep the responses from the previous calls, as
+        // that would make the responseitem list grow, and the same data would be reported to the channels as it's only
+        // the first value for each channel that's used
+        // Request request = getRequest();
+        // Response response = getResponse();
+        request = getRequest();
+        response = getResponse(true);
 
         // FIXME The below commented request types are not currently used in the binding (there's no channels for them),
         // so no need to fetch the data.
