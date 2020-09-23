@@ -152,13 +152,91 @@ OFF=No
 -=No data yet
 ```
 
+### Example pelletburner.rules
+
+Uses https://www.openhab.org/addons/bindings/mail/
+
+```
+rule "Pelletburner status alert"
+when
+        Item BurnerAlarmCode changed
+then
+        var int alarmCode = (BurnerAlarmCode.state as DecimalType).intValue
+        val alarmText = BurnerAlarmText.state
+        val mailActions = getActions("mail","mail:smtp:smtpnotifications")
+
+        if      (
+                        (alarmCode != 2) &&
+                        (alarmCode != 5) &&
+                        (alarmCode != 9) &&
+                        (alarmCode != 14) &&
+                        (alarmCode != 201) &&
+                        (alarmCode != 202) &&
+                        (alarmCode != 204) &&
+                        (alarmCode != 216) &&
+                        (alarmCode != 900) &&
+                        (alarmCode != 908) &&
+                        (alarmCode != 913) &&
+                        (alarmCode != 914) &&
+                        (alarmCode != 23) &&
+                        (alarmCode != 2300) &&
+                        (alarmCode != 2308) &&
+                        (alarmCode != 2313)
+                )
+                mailActions.sendMail("pellburnalert@yourdomain.net", alarmText + " (" + alarmCode + ")", "See subject")
+end
+
+rule "Pelletburner refill alert"
+when
+        Item RefillSilo changed
+then
+        var String subject = ""
+
+        //If it is on, it means the silo needs to be refilled
+        if (RefillSilo.state == ON)
+        {
+                var int siloContents = (BurnerSiloContents.state as DecimalType).intValue
+                var int siloMinimumContents = (BurnerSiloMinimumContents.state as DecimalType).intValue
+                var String body = ""
+                val mailActions = getActions("mail","mail:smtp:smtpnotifications")
+
+                //Send mail if contents is low
+                subject = "Refill silo"
+                body = "Contents in silo: " + siloContents + "\nWarning limit: " + siloMinimumContents
+                mailActions.sendMail("pellburnalert@yourdomain.net", subject, body)
+        }
+
+        //Update status item
+        SiloStatus.postUpdate(subject)
+end
+
+rule "Pelletburner clean tray alert"
+when
+        Item BurnerCleaningCountdown changed
+then
+        var int cleaningCounter = (BurnerCleaningCountdown.state as DecimalType).intValue
+        var String msg = ""
+        val mailActions = getActions("mail","mail:smtp:smtpnotifications")
+
+        //Send mail if ash tray must be cleaned
+        if (cleaningCounter <= 0){
+                msg = "Clean ash tray"
+                mailActions.sendMail("pellburnalert@yourdomain.net", msg, "See subject")
+        }
+
+        //Update status item
+        TrayStatus.postUpdate(msg)
+end
+```
+
+
 ## Any custom content here!
 
 ### General information
 
 The functionality of this binding has been created mainly by reverseengineering using Wireshark to figure out parts of the protocol.
 
-Only reading of data and not writing of data is implemented, as that would require getting hold of the documentation as I don't want to risk bricking my burner.
+Only reading of data and not writing of data is implemented, as that would require getting hold of the documentation as I don't want to risk bricking or damaging my burner.
 
 ### Adding new products/models
 
