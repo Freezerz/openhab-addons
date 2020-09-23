@@ -230,21 +230,22 @@ end
 ```
 
 
-## Any custom content here!
+## General information
 
-### General information
+The functionality of this binding has been created mainly by reverseengineering using Wireshark to figure out parts of the protocol. 
 
-The functionality of this binding has been created mainly by reverseengineering using Wireshark to figure out parts of the protocol.
+Also https://github.com/motoz/nbetest has been used initially to figure out how to connect.
+
 
 Only reading of data and not writing of data is implemented, as that would require getting hold of the documentation as I don't want to risk bricking or damaging my burner.
 
-### Adding new products/models
+## Adding new products/models
 
 If it's a completely different model, it should be necessary to create a new Thing.
 
 If it's a different software model of an already implemented model, it should be enough to create a new set of subclasses for Protocol, Request, RequestType and Response.
 
-### Troubleshooting
+## Troubleshooting
 
 Sometimes the burner becomes unreachable.
 
